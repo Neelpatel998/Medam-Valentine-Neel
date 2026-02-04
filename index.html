@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Medam 💘</title>
+
   <style>
     body{
       font-family: Arial, sans-serif;
@@ -28,30 +29,54 @@
     img{
       width:100%;
       border-radius:14px;
+      display:block;
     }
     h2{ margin:14px 0 6px; }
-    .sub{ font-size:14px; opacity:.75; margin-bottom:12px; }
+    .sub{ font-size:14px; opacity:.75; margin:0 0 12px; }
+
+    /* Button area */
     .buttons{
       margin-top:18px;
       position:relative;
-      height:90px;
+      height:80px;
     }
+
     button{
-      padding:10px 18px;
+      padding:12px 22px;
       font-size:16px;
-      border-radius:10px;
+      border-radius:12px;
       border:none;
       cursor:pointer;
       user-select:none;
       transition: transform 0.15s ease;
     }
-    #yes{ background:#ff4d6d; color:white; }
+
+    #yes{
+      background:#ff4d6d;
+      color:white;
+      position:absolute;
+      left:20px;
+      top:10px;
+      z-index:2;
+    }
+
     #no{
       background:#e6e6e6;
       position:absolute;
-      left:190px;
-      top:0;
+      right:20px;
+      top:10px;
+      z-index:3;
     }
+
+    /* Message line stays BELOW buttons */
+    #msgLine{
+      margin-top:10px;
+      font-size:14px;
+      opacity:0.85;
+      min-height:18px; /* prevents jumping */
+    }
+
+    /* hearts */
     .heart{
       position:absolute;
       font-size:18px;
@@ -63,51 +88,95 @@
     }
   </style>
 </head>
+
 <body>
   <div class="card" id="card">
-    <img src="IMG_0776.jpeg" alt="Meme">
+    <!-- ✅ FIXED PATH -->
+    <img src="./IMG_0776.jpeg" alt="Meme">
+
     <h2>Medam, be my Valentine? 💘</h2>
-    <p class="sub" id="sub">Don’t press NO… 👀</p>
-    <div class="buttons">
+    <p class="sub">Choose wisely 😏</p>
+
+    <div class="buttons" id="btnArea">
       <button id="yes" onclick="yesClicked()">Yes ❤️</button>
-      <button id="no" onmouseover="noEscape()" onclick="noClicked()">No 😐</button>
+      <button id="no" onmouseover="tryNo()" onclick="tryNo()">No 😐</button>
     </div>
+
+    <!-- ✅ Message line ALWAYS below both buttons -->
+    <div id="msgLine">Go on… try pressing NO 😂</div>
   </div>
+
 <script>
-  const noBtn = document.getElementById("no");
-  const yesBtn = document.getElementById("yes");
-  const sub = document.getElementById("sub");
   const card = document.getElementById("card");
+  const btnArea = document.getElementById("btnArea");
+  const yesBtn = document.getElementById("yes");
+  const noBtn  = document.getElementById("no");
+  const msg    = document.getElementById("msgLine");
+
   let tries = 0;
   let yesScale = 1;
+
   const noTexts = [
-    "Are you sure? 😏","Medam pls 🥺","Wrong button 😂","Nice try 😌",
-    "Police incoming 🚨","Your mom will know 😭","Final warning 😤","NO is cancelled ❌😂"
+    "Wrong button 😂",
+    "Are you sure? 😏",
+    "Medam pls 🥺",
+    "NO is not allowed 🚫",
+    "Think again 😌",
+    "Final warning 😤",
+    "LAST chance 😳"
   ];
-  function noEscape(){
+
+  // Keep NO button inside the button area (never disappears)
+  function moveNoInsideBox() {
+    const areaRect = btnArea.getBoundingClientRect();
+
+    // allowed movement range inside the buttons box
+    const maxX = 110;   // keep it visible
+    const maxY = 25;
+
+    const x = Math.floor(Math.random() * (maxX * 2 + 1)) - maxX;
+    const y = Math.floor(Math.random() * (maxY * 2 + 1)) - maxY;
+
+    // use transform so it stays inside and doesn't “vanish”
+    noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  function tryNo() {
     tries++;
+
+    // YES grows every time she tries NO
     yesScale += 0.18;
     yesBtn.style.transform = `scale(${yesScale})`;
-    const x = Math.random()*260 - 130;
-    const y = Math.random()*60 - 30;
-    noBtn.style.left = (180 + x) + "px";
-    noBtn.style.top  = (0 + y) + "px";
-    noBtn.innerText = noTexts[tries % noTexts.length];
-    sub.innerText = "YES is looking kinda big now 👀😂";
+
+    // Update message line (below buttons)
+    msg.innerText = noTexts[tries % noTexts.length];
+
+    // NO stays visible until last try
+    if (tries < 7) {
+      moveNoInsideBox();
+    } else {
+      // last try: NO still visible but becomes tiny + says “ok ok”
+      noBtn.style.transform = "scale(0.75)";
+      msg.innerText = "Okay okay… just press YES 😂❤️";
+    }
   }
-  function noClicked(){
-    sub.innerText = "Nice try… YES only 😌";
-    noEscape();
-  }
+
   function yesClicked(){
-    for(let i=0;i<35;i++){ setTimeout(spawnHeart, i*25); }
+    for(let i=0;i<35;i++){
+      setTimeout(spawnHeart, i*25);
+    }
+
     setTimeout(() => {
-      card.innerHTML = `<h1>YAYYYY!!! 🎉💖</h1>
-      <p>Medam said YES 😍</p>
-      <p>You are officially stuck with me 😄</p>
-      <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" style="width:100%;border-radius:14px;">`;
+      card.innerHTML = `
+        <h1>YAYYYY!!! 🎉💖</h1>
+        <p>Medam said YES 😍</p>
+        <p>You are officially stuck with me 😄</p>
+        <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+             style="width:100%;border-radius:14px;">
+      `;
     }, 700);
   }
+
   function spawnHeart(){
     const heart = document.createElement("div");
     heart.className = "heart";
@@ -118,5 +187,6 @@
     setTimeout(() => heart.remove(), 1700);
   }
 </script>
+
 </body>
 </html>
