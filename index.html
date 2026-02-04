@@ -18,11 +18,11 @@
     }
     .card{
       background:white;
-      padding:24px;
+      padding:22px;
       border-radius:16px;
       box-shadow:0 10px 30px rgba(0,0,0,0.12);
-      width:90%;
-      max-width:360px;
+      width:92%;
+      max-width:380px;
       position: relative;
       overflow:hidden;
     }
@@ -32,12 +32,27 @@
       display:block;
     }
     h2{ margin:14px 0 6px; }
-    .sub{ font-size:14px; opacity:.75; margin:0 0 12px; }
+    .sub{ font-size:14px; opacity:.75; margin:0 0 10px; }
+
+    /* Screenshot badge */
+    .badge{
+      position:absolute;
+      top:12px;
+      right:12px;
+      background:rgba(0,0,0,0.72);
+      color:white;
+      padding:8px 10px;
+      border-radius:12px;
+      font-size:12px;
+      z-index:50;
+      line-height:1.2;
+      cursor:pointer;
+    }
 
     .buttons{
-      margin-top:18px;
+      margin-top:16px;
       position:relative;
-      height:80px;
+      height:92px;
     }
     button{
       padding:12px 22px;
@@ -47,31 +62,119 @@
       cursor:pointer;
       user-select:none;
       transition: transform 0.15s ease;
+      white-space: nowrap;
     }
 
     #yes{
       background:#ff4d6d;
       color:white;
       position:absolute;
-      left:18px;
-      top:10px;
+      left:14px;
+      top:14px;
       z-index:2;
+      transform-origin:left center;
     }
     #no{
       background:#e6e6e6;
       position:absolute;
-      right:18px;
-      top:10px;
+      left:210px;
+      top:14px;
       z-index:3;
+      transform-origin:center;
     }
 
     #msgLine{
-      margin-top:10px;
+      margin-top:12px;
       font-size:14px;
-      opacity:0.9;
-      min-height:20px;
+      opacity:0.92;
+      min-height:24px;
     }
 
+    /* Fake loading bar */
+    .barWrap{
+      margin:10px auto 0;
+      width:92%;
+      height:10px;
+      background:#f1f1f1;
+      border-radius:999px;
+      overflow:hidden;
+      display:none;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background:#ff4d6d;
+      border-radius:999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Wife Approval popup */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.5);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+    }
+    .popup{
+      width:min(92vw, 360px);
+      background:white;
+      border-radius:16px;
+      padding:18px;
+      text-align:left;
+      box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    }
+    .popup h3{
+      margin:0 0 8px;
+      font-size:16px;
+    }
+    .popup p{
+      margin:0 0 12px;
+      font-size:14px;
+      opacity:0.9;
+    }
+    .popup .row{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+    }
+    .miniBtn{
+      padding:10px 14px;
+      border-radius:12px;
+      border:none;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .miniBtn.primary{
+      background:#ff4d6d;
+      color:white;
+    }
+    .miniBtn.gray{
+      background:#e6e6e6;
+    }
+
+    /* Toast (fake screenshot detector) */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:28px;
+      transform:translateX(-50%);
+      background:rgba(0,0,0,0.85);
+      color:#fff;
+      padding:14px 16px;
+      border-radius:16px;
+      font-size:14px;
+      z-index:1000;
+      display:none;
+      text-align:center;
+      max-width:92vw;
+      box-shadow:0 8px 20px rgba(0,0,0,0.25);
+    }
+    .toast b{ color:#ffd6e0; }
+
+    /* Hearts */
     .heart{
       position:absolute;
       font-size:18px;
@@ -85,8 +188,36 @@
 </head>
 
 <body>
+
+  <!-- Wife Approval Department popup -->
+  <div class="overlay" id="overlay">
+    <div class="popup">
+      <h3>📞 Wife Approval Department</h3>
+      <p>
+        Hello Medam 👑<br>
+        We received a request to press <b>NO</b>.<br>
+        This request has been <b>REJECTED</b> ✅
+      </p>
+      <p style="font-size:13px;opacity:.8;">
+        Reason: “He’s your husband. Annoying, but yours.” 😂
+      </p>
+      <div class="row">
+        <button class="miniBtn gray" onclick="closePopup()">Fine 🙄</button>
+        <button class="miniBtn primary" onclick="forceYes()">Press YES 😌</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast: fake screenshot detector -->
+  <div class="toast" id="toast">
+    📸 Screenshot detected 👀<br>
+    <b>Neel wins confirmed</b> 😏👑
+  </div>
+
   <div class="card" id="card">
-    <!-- ✅ Match your GitHub file name exactly -->
+    <div class="badge">📸 Screenshot & tap here<br><b>= Neel wins</b> 😏</div>
+
+    <!-- ✅ Must match GitHub file name exactly -->
     <img src="./IMG_0776.PNG" alt="Meme">
 
     <h2>Medam, be my Valentine? 💘</h2>
@@ -95,6 +226,10 @@
     <div class="buttons" id="btnArea">
       <button id="yes" onclick="yesClicked()">Yes ❤️</button>
       <button id="no" onmouseover="tryNo()" onclick="tryNo()">No 😐</button>
+    </div>
+
+    <div class="barWrap" id="barWrap">
+      <div class="bar" id="bar"></div>
     </div>
 
     <div id="msgLine">Try pressing NO… if you dare 😈</div>
@@ -106,77 +241,202 @@
   const yesBtn = document.getElementById("yes");
   const noBtn  = document.getElementById("no");
   const msg    = document.getElementById("msgLine");
+  const barWrap= document.getElementById("barWrap");
+  const bar    = document.getElementById("bar");
+  const overlay= document.getElementById("overlay");
+  const toast  = document.getElementById("toast");
 
   let tries = 0;
   let yesScale = 1;
+  let noX = 0, noY = 0;
+  let popupShown = false;
 
-  // wife + funny escalating lines
   const lines = [
     "Wrong button 😂",
-    "Medam… you’re already my wife 😭",
-    "You said NO? I’m telling your mom 😤",
-    "NO detected 🚨 initiating husband apology protocol…",
-    "I will do dishes for 7 days… just press YES 🥺",
-    "Ok ok you’re right (as usual) 😌 now press YES",
+    "Medam… you’re literally my wife 😭",
+    "You said NO? I’m telling your mom 🥲",
+    "NO detected 🚨 starting husband apology protocol…",
+    "Ok ok you were right (again) 😌",
     "If you press NO again… shopping cart doubles 🛒😂",
-    "Final warning: I’m cooking. Everyone will suffer 😭",
-    "Queen, please. YES only 👑❤️"
+    "Final warning: I’m cooking dinner 😭🔥",
+    "Queen please… YES only 👑❤️"
   ];
 
-  function moveNoInsideBox() {
-    const maxX = 105;
-    const maxY = 22;
-    const x = Math.floor(Math.random() * (maxX * 2 + 1)) - maxX;
-    const y = Math.floor(Math.random() * (maxY * 2 + 1)) - maxY;
-    noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  const chores = [
+    "✅ Dishes duty",
+    "✅ Foot massage coupon",
+    "✅ Laundry mission",
+    "✅ ‘Yes dear’ subscription",
+    "✅ Extra snacks tax",
+    "✅ Apology flowers protocol"
+  ];
+
+  /* (1) Vibration (best effort) */
+  function vibrate(pattern){
+    try{ if (navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
   }
 
-  function tryNo(){
-    tries++;
-
-    // YES gets bigger each NO attempt
-    yesScale += 0.18;
-    yesBtn.style.transform = `scale(${yesScale})`;
-
-    // message line stays below
-    msg.innerText = `NO attempts: ${tries} — ${lines[tries % lines.length]}`;
-
-    // NO stays visible, only moves around
-    moveNoInsideBox();
-
-    // after enough tries, NO becomes weak 😂
-    if (tries >= 8) {
-      noBtn.style.transform = "scale(0.8)";
-      msg.innerText = `NO attempts: ${tries} — Okay okay QUEEN 👑 just press YES 😂❤️`;
-    }
-  }
-
-  function yesClicked(){
-    for(let i=0;i<40;i++){
-      setTimeout(spawnHeart, i*22);
-    }
-
-    setTimeout(() => {
-      card.innerHTML = `
-        <h1 style="margin:0 0 6px;">WIFE CONFIRMED ✅💖</h1>
-        <p style="margin:0 0 8px;">Medam said YES 😍</p>
-        <p style="margin:0 0 8px;">Now I owe you: hugs + snacks + peace 🙇‍♂️😂</p>
-        <p style="margin:0 0 14px;"><b>Terms & Conditions:</b> You are always right. Forever.</p>
-        <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
-             style="width:100%;border-radius:14px;">
-      `;
-    }, 700);
-  }
-
+  /* Hearts */
   function spawnHeart(){
     const heart = document.createElement("div");
     heart.className = "heart";
-    heart.innerText = ["💖","💘","💕","❤️","😍","😘","👑"][Math.floor(Math.random()*7)];
+    heart.innerText = ["💖","💘","💕","❤️","😍","😘","👑","🛒"][Math.floor(Math.random()*8)];
     heart.style.left = Math.random()*320 + "px";
     heart.style.opacity = Math.random();
     card.appendChild(heart);
     setTimeout(() => heart.remove(), 1700);
   }
+
+  /* Keep NO button always inside the visible button area */
+  function clampNoInside() {
+    const area = btnArea.getBoundingClientRect();
+    const nb = noBtn.getBoundingClientRect();
+
+    const minLeft = area.left + 8;
+    const maxLeft = area.right - nb.width - 8;
+    const minTop  = area.top + 6;
+    const maxTop  = area.bottom - nb.height - 6;
+
+    let dx = 0, dy = 0;
+
+    if (nb.left < minLeft) dx = (minLeft - nb.left);
+    if (nb.left > maxLeft) dx = (maxLeft - nb.left);
+    if (nb.top  < minTop)  dy = (minTop - nb.top);
+    if (nb.top  > maxTop)  dy = (maxTop - nb.top);
+
+    noX += dx;
+    noY += dy;
+
+    const scale = tries >= 10 ? 0.88 : 1;
+    noBtn.style.transform = `translate(${noX}px, ${noY}px) scale(${scale})`;
+  }
+
+  function moveNoRandomButSafe() {
+    const x = Math.floor(Math.random()*220) - 110;
+    const y = Math.floor(Math.random()*44)  - 22;
+    noX = x;
+    noY = y;
+    noBtn.style.transform = `translate(${noX}px, ${noY}px)`;
+    requestAnimationFrame(clampNoInside);
+  }
+
+  function showApologyBar(percent){
+    barWrap.style.display = "block";
+    bar.style.width = percent + "%";
+  }
+
+  /* (2) Wife Approval popup */
+  function openPopup(){
+    overlay.style.display = "flex";
+    vibrate([80,40,80]);
+  }
+  function closePopup(){
+    overlay.style.display = "none";
+  }
+  function forceYes(){
+    closePopup();
+    yesClicked();
+  }
+
+  /* (3) Fake screenshot detector toast */
+  function showToast(customText){
+    toast.innerHTML = customText || `📸 Screenshot detected 👀<br><b>Neel wins confirmed</b> 😏👑<br><span style="font-size:12px;opacity:.9;">Evidence secured. Wife caught in 4K 😂</span>`;
+    toast.style.display = "block";
+    vibrate([90,40,90]);
+    for(let i=0;i<18;i++) setTimeout(spawnHeart, i*22);
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toast.style.display="none", 2600);
+  }
+
+  // Badge tap => "detected"
+  document.addEventListener("click", (e)=>{
+    if (e.target.closest(".badge")) showToast();
+  });
+
+  // App switch / background => set flag, show toast on return
+  document.addEventListener("visibilitychange", ()=>{
+    if (document.visibilityState === "hidden") {
+      localStorage.setItem("ss_detected","1");
+    } else {
+      if (localStorage.getItem("ss_detected")==="1") {
+        localStorage.removeItem("ss_detected");
+        showToast("📸 Screenshot activity detected 👀<br><b>Neel wins confirmed</b> 😏✅");
+      }
+    }
+  });
+
+  // Long press anywhere => "detected"
+  let pressTimer;
+  document.addEventListener("touchstart", ()=>{
+    pressTimer = setTimeout(()=> showToast(), 650);
+  }, {passive:true});
+  document.addEventListener("touchend", ()=> clearTimeout(pressTimer));
+
+  function tryNo(){
+    tries++;
+
+    // Vibrate on NO attempts
+    vibrate([50]);
+
+    // YES grows bigger
+    yesScale += 0.16;
+    yesBtn.style.transform = `scale(${yesScale})`;
+
+    msg.innerText = `NO attempts: ${tries} — ${lines[tries % lines.length]}`;
+
+    // NO runs but stays visible
+    moveNoRandomButSafe();
+
+    // Apology bar progression
+    if (tries === 3) showApologyBar(25);
+    if (tries === 4) showApologyBar(45);
+    if (tries === 5) {
+      showApologyBar(70);
+      msg.innerText = `NO attempts: ${tries} — Uploading apology… ${chores[Math.floor(Math.random()*chores.length)]} 😂`;
+      vibrate([80,30,80]);
+    }
+    if (tries >= 6 && tries <= 8) {
+      showApologyBar(80 + (tries-6)*7);
+      msg.innerText = `NO attempts: ${tries} — ${chores[Math.floor(Math.random()*chores.length)]} (wife auto-approved) 👑😂`;
+    }
+
+    // Popup trigger (once)
+    if (tries >= 7 && !popupShown) {
+      popupShown = true;
+      setTimeout(openPopup, 350);
+    }
+
+    // Final stage
+    if (tries >= 10) {
+      noBtn.textContent = "Ok queen 👑";
+      showApologyBar(100);
+      msg.innerText = `NO attempts: ${tries} — Alright… you win 😭 press YES ❤️`;
+      requestAnimationFrame(clampNoInside);
+    }
+  }
+
+  function yesClicked(){
+    vibrate([120,40,120]);
+    for(let i=0;i<45;i++) setTimeout(spawnHeart, i*18);
+
+    setTimeout(() => {
+      card.innerHTML = `
+        <div class="badge">📸 Screenshot & tap here<br><b>= Neel wins</b> 😏</div>
+        <h1 style="margin:0 0 6px;">WIFE CONFIRMED ✅💖</h1>
+        <p style="margin:0 0 6px;">Medam said YES 😍</p>
+        <p style="margin:0 0 10px;"><b>Marriage rule update:</b> You are always right. Forever.</p>
+        <p style="margin:0 0 14px;">Husband status: <b>Obsessed ✅</b> | Wallet: <b>in danger 🛒</b></p>
+        <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
+             style="width:100%;border-radius:14px;">
+      `;
+    }, 650);
+  }
+
+  // Ensure NO stays in the area even on tiny screens
+  window.addEventListener("load", () => {
+    clampNoInside();
+    window.addEventListener("resize", clampNoInside);
+  });
 </script>
 
 </body>
