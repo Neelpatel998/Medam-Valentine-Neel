@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Medam 💘</title>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#fff5f7;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+      text-align:center;
+    }
+    .card{
+      background:white;
+      padding:24px;
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+      width:90%;
+      max-width:360px;
+      position: relative;
+      overflow:hidden;
+    }
+    img{
+      width:100%;
+      border-radius:14px;
+    }
+    h2{ margin:14px 0 6px; }
+    .sub{ font-size:14px; opacity:.75; margin-bottom:12px; }
+    .buttons{
+      margin-top:18px;
+      position:relative;
+      height:90px;
+    }
+    button{
+      padding:10px 18px;
+      font-size:16px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      user-select:none;
+      transition: transform 0.15s ease;
+    }
+    #yes{ background:#ff4d6d; color:white; }
+    #no{
+      background:#e6e6e6;
+      position:absolute;
+      left:190px;
+      top:0;
+    }
+    .heart{
+      position:absolute;
+      font-size:18px;
+      animation: fall 1.6s linear forwards;
+      top:-20px;
+    }
+    @keyframes fall{
+      to{ transform: translateY(520px) rotate(360deg); opacity:0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <img src="IMG_0776.jpeg" alt="Meme">
+    <h2>Medam, be my Valentine? 💘</h2>
+    <p class="sub" id="sub">Don’t press NO… 👀</p>
+    <div class="buttons">
+      <button id="yes" onclick="yesClicked()">Yes ❤️</button>
+      <button id="no" onmouseover="noEscape()" onclick="noClicked()">No 😐</button>
+    </div>
+  </div>
+<script>
+  const noBtn = document.getElementById("no");
+  const yesBtn = document.getElementById("yes");
+  const sub = document.getElementById("sub");
+  const card = document.getElementById("card");
+  let tries = 0;
+  let yesScale = 1;
+  const noTexts = [
+    "Are you sure? 😏","Medam pls 🥺","Wrong button 😂","Nice try 😌",
+    "Police incoming 🚨","Your mom will know 😭","Final warning 😤","NO is cancelled ❌😂"
+  ];
+  function noEscape(){
+    tries++;
+    yesScale += 0.18;
+    yesBtn.style.transform = `scale(${yesScale})`;
+    const x = Math.random()*260 - 130;
+    const y = Math.random()*60 - 30;
+    noBtn.style.left = (180 + x) + "px";
+    noBtn.style.top  = (0 + y) + "px";
+    noBtn.innerText = noTexts[tries % noTexts.length];
+    sub.innerText = "YES is looking kinda big now 👀😂";
+  }
+  function noClicked(){
+    sub.innerText = "Nice try… YES only 😌";
+    noEscape();
+  }
+  function yesClicked(){
+    for(let i=0;i<35;i++){ setTimeout(spawnHeart, i*25); }
+    setTimeout(() => {
+      card.innerHTML = `<h1>YAYYYY!!! 🎉💖</h1>
+      <p>Medam said YES 😍</p>
+      <p>You are officially stuck with me 😄</p>
+      <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" style="width:100%;border-radius:14px;">`;
+    }, 700);
+  }
+  function spawnHeart(){
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerText = ["💖","💘","💕","❤️","😍","😘"][Math.floor(Math.random()*6)];
+    heart.style.left = Math.random()*320 + "px";
+    heart.style.opacity = Math.random();
+    card.appendChild(heart);
+    setTimeout(() => heart.remove(), 1700);
+  }
+</script>
+</body>
+</html>
