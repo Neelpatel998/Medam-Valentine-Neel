@@ -34,13 +34,11 @@
     h2{ margin:14px 0 6px; }
     .sub{ font-size:14px; opacity:.75; margin:0 0 12px; }
 
-    /* Button area */
     .buttons{
       margin-top:18px;
       position:relative;
       height:80px;
     }
-
     button{
       padding:12px 22px;
       font-size:16px;
@@ -55,28 +53,25 @@
       background:#ff4d6d;
       color:white;
       position:absolute;
-      left:20px;
+      left:18px;
       top:10px;
       z-index:2;
     }
-
     #no{
       background:#e6e6e6;
       position:absolute;
-      right:20px;
+      right:18px;
       top:10px;
       z-index:3;
     }
 
-    /* Message line stays BELOW buttons */
     #msgLine{
       margin-top:10px;
       font-size:14px;
-      opacity:0.85;
-      min-height:18px; /* prevents jumping */
+      opacity:0.9;
+      min-height:20px;
     }
 
-    /* hearts */
     .heart{
       position:absolute;
       font-size:18px;
@@ -91,19 +86,18 @@
 
 <body>
   <div class="card" id="card">
-    <!-- ✅ FIXED PATH -->
+    <!-- ✅ Match your GitHub file name exactly -->
     <img src="./IMG_0776.PNG" alt="Meme">
 
     <h2>Medam, be my Valentine? 💘</h2>
-    <p class="sub">Choose wisely 😏</p>
+    <p class="sub">Wife edition. Choose wisely 👑😌</p>
 
     <div class="buttons" id="btnArea">
       <button id="yes" onclick="yesClicked()">Yes ❤️</button>
       <button id="no" onmouseover="tryNo()" onclick="tryNo()">No 😐</button>
     </div>
 
-    <!-- ✅ Message line ALWAYS below both buttons -->
-    <div id="msgLine">Go on… try pressing NO 😂</div>
+    <div id="msgLine">Try pressing NO… if you dare 😈</div>
   </div>
 
 <script>
@@ -116,61 +110,58 @@
   let tries = 0;
   let yesScale = 1;
 
-  const noTexts = [
+  // wife + funny escalating lines
+  const lines = [
     "Wrong button 😂",
-    "Are you sure? 😏",
-    "Medam pls 🥺",
-    "NO is not allowed 🚫",
-    "Think again 😌",
-    "Final warning 😤",
-    "LAST chance 😳"
+    "Medam… you’re already my wife 😭",
+    "You said NO? I’m telling your mom 😤",
+    "NO detected 🚨 initiating husband apology protocol…",
+    "I will do dishes for 7 days… just press YES 🥺",
+    "Ok ok you’re right (as usual) 😌 now press YES",
+    "If you press NO again… shopping cart doubles 🛒😂",
+    "Final warning: I’m cooking. Everyone will suffer 😭",
+    "Queen, please. YES only 👑❤️"
   ];
 
-  // Keep NO button inside the button area (never disappears)
   function moveNoInsideBox() {
-    const areaRect = btnArea.getBoundingClientRect();
-
-    // allowed movement range inside the buttons box
-    const maxX = 110;   // keep it visible
-    const maxY = 25;
-
+    const maxX = 105;
+    const maxY = 22;
     const x = Math.floor(Math.random() * (maxX * 2 + 1)) - maxX;
     const y = Math.floor(Math.random() * (maxY * 2 + 1)) - maxY;
-
-    // use transform so it stays inside and doesn't “vanish”
     noBtn.style.transform = `translate(${x}px, ${y}px)`;
   }
 
-  function tryNo() {
+  function tryNo(){
     tries++;
 
-    // YES grows every time she tries NO
+    // YES gets bigger each NO attempt
     yesScale += 0.18;
     yesBtn.style.transform = `scale(${yesScale})`;
 
-    // Update message line (below buttons)
-    msg.innerText = noTexts[tries % noTexts.length];
+    // message line stays below
+    msg.innerText = `NO attempts: ${tries} — ${lines[tries % lines.length]}`;
 
-    // NO stays visible until last try
-    if (tries < 7) {
-      moveNoInsideBox();
-    } else {
-      // last try: NO still visible but becomes tiny + says “ok ok”
-      noBtn.style.transform = "scale(0.75)";
-      msg.innerText = "Okay okay… just press YES 😂❤️";
+    // NO stays visible, only moves around
+    moveNoInsideBox();
+
+    // after enough tries, NO becomes weak 😂
+    if (tries >= 8) {
+      noBtn.style.transform = "scale(0.8)";
+      msg.innerText = `NO attempts: ${tries} — Okay okay QUEEN 👑 just press YES 😂❤️`;
     }
   }
 
   function yesClicked(){
-    for(let i=0;i<35;i++){
-      setTimeout(spawnHeart, i*25);
+    for(let i=0;i<40;i++){
+      setTimeout(spawnHeart, i*22);
     }
 
     setTimeout(() => {
       card.innerHTML = `
-        <h1>YAYYYY!!! 🎉💖</h1>
-        <p>Medam said YES 😍</p>
-        <p>You are officially stuck with me 😄</p>
+        <h1 style="margin:0 0 6px;">WIFE CONFIRMED ✅💖</h1>
+        <p style="margin:0 0 8px;">Medam said YES 😍</p>
+        <p style="margin:0 0 8px;">Now I owe you: hugs + snacks + peace 🙇‍♂️😂</p>
+        <p style="margin:0 0 14px;"><b>Terms & Conditions:</b> You are always right. Forever.</p>
         <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
              style="width:100%;border-radius:14px;">
       `;
@@ -180,7 +171,7 @@
   function spawnHeart(){
     const heart = document.createElement("div");
     heart.className = "heart";
-    heart.innerText = ["💖","💘","💕","❤️","😍","😘"][Math.floor(Math.random()*6)];
+    heart.innerText = ["💖","💘","💕","❤️","😍","😘","👑"][Math.floor(Math.random()*7)];
     heart.style.left = Math.random()*320 + "px";
     heart.style.opacity = Math.random();
     card.appendChild(heart);
