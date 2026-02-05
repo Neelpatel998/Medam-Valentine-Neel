@@ -34,21 +34,6 @@
     h2{ margin:14px 0 6px; }
     .sub{ font-size:14px; opacity:.75; margin:0 0 10px; }
 
-    /* Screenshot badge */
-    .badge{
-      position:absolute;
-      top:12px;
-      right:12px;
-      background:rgba(0,0,0,0.72);
-      color:white;
-      padding:8px 10px;
-      border-radius:12px;
-      font-size:12px;
-      z-index:50;
-      line-height:1.2;
-      cursor:pointer;
-    }
-
     .buttons{
       margin-top:16px;
       position:relative;
@@ -155,41 +140,57 @@
       background:#e6e6e6;
     }
 
-    /* Toast (fake screenshot detector) */
+    /* Toast (shown only AFTER YES) */
     .toast{
       position:fixed;
       left:50%;
-      bottom:28px;
+      bottom:18px;
       transform:translateX(-50%);
       background:rgba(0,0,0,0.85);
       color:#fff;
-      padding:14px 16px;
-      border-radius:16px;
-      font-size:14px;
+      padding:12px 14px;
+      border-radius:14px;
+      font-size:13px;
       z-index:1000;
       display:none;
       text-align:center;
       max-width:92vw;
       box-shadow:0 8px 20px rgba(0,0,0,0.25);
+      pointer-events:none; /* never blocks content */
     }
     .toast b{ color:#ffd6e0; }
 
-    /* Hearts */
-    .heart{
+    /* Hearts & Flowers */
+    .floaty{
       position:absolute;
-      font-size:18px;
+      font-size:20px;
       animation: fall 1.6s linear forwards;
-      top:-20px;
+      top:-22px;
+      z-index: 5;
     }
     @keyframes fall{
-      to{ transform: translateY(520px) rotate(360deg); opacity:0; }
+      to{ transform: translateY(560px) rotate(360deg); opacity:0; }
     }
+
+    /* Final footer badge (only on YES screen) */
+    .finalBadge{
+      margin-top:12px;
+      display:inline-block;
+      background:#111;
+      color:#fff;
+      padding:10px 12px;
+      border-radius:14px;
+      font-size:13px;
+      opacity:0.92;
+      cursor:pointer;
+      user-select:none;
+    }
+    .finalBadge b{ color:#ffd6e0; }
   </style>
 </head>
 
 <body>
 
-  <!-- Wife Approval Department popup -->
   <div class="overlay" id="overlay">
     <div class="popup">
       <h3>📞 Wife Approval Department</h3>
@@ -208,16 +209,12 @@
     </div>
   </div>
 
-  <!-- Toast: fake screenshot detector -->
   <div class="toast" id="toast">
     📸 Screenshot detected 👀<br>
     <b>Neel wins confirmed</b> 😏👑
   </div>
 
   <div class="card" id="card">
-    <div class="badge">📸 Screenshot & tap here<br><b>= Neel wins</b> 😏</div>
-
-    <!-- ✅ Must match GitHub file name exactly -->
     <img src="./IMG_0776.PNG" alt="Meme">
 
     <h2>Medam, be my Valentine? 💘</h2>
@@ -251,6 +248,9 @@
   let noX = 0, noY = 0;
   let popupShown = false;
 
+  // Screenshot toast + triggers only AFTER YES (as you requested)
+  let screenshotMode = false;
+
   const lines = [
     "Wrong button 😂",
     "Medam… you’re literally my wife 😭",
@@ -262,32 +262,30 @@
     "Queen please… YES only 👑❤️"
   ];
 
-  const chores = [
-    "✅ Dishes duty",
-    "✅ Foot massage coupon",
-    "✅ Laundry mission",
-    "✅ ‘Yes dear’ subscription",
-    "✅ Extra snacks tax",
-    "✅ Apology flowers protocol"
-  ];
-
-  /* (1) Vibration (best effort) */
   function vibrate(pattern){
     try{ if (navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
   }
 
-  /* Hearts */
-  function spawnHeart(){
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerText = ["💖","💘","💕","❤️","😍","😘","👑","🛒"][Math.floor(Math.random()*8)];
-    heart.style.left = Math.random()*320 + "px";
-    heart.style.opacity = Math.random();
-    card.appendChild(heart);
-    setTimeout(() => heart.remove(), 1700);
+  function spawnEmoji(emoji){
+    const el = document.createElement("div");
+    el.className = "floaty";
+    el.innerText = emoji;
+    el.style.left = (Math.random()*320) + "px";
+    el.style.opacity = (0.65 + Math.random()*0.35);
+    card.appendChild(el);
+    setTimeout(() => el.remove(), 1700);
   }
 
-  /* Keep NO button always inside the visible button area */
+  function spawnHearts(n=18){
+    const arr = ["💖","💘","💕","❤️","😍","😘","👑","🛒"];
+    for(let i=0;i<n;i++) setTimeout(()=>spawnEmoji(arr[Math.floor(Math.random()*arr.length)]), i*22);
+  }
+
+  function spawnFlowers(n=14){
+    const arr = ["🌹","💐","🌸","🌺","🌷"];
+    for(let i=0;i<n;i++) setTimeout(()=>spawnEmoji(arr[Math.floor(Math.random()*arr.length)]), i*26);
+  }
+
   function clampNoInside() {
     const area = btnArea.getBoundingClientRect();
     const nb = noBtn.getBoundingClientRect();
@@ -304,8 +302,7 @@
     if (nb.top  < minTop)  dy = (minTop - nb.top);
     if (nb.top  > maxTop)  dy = (maxTop - nb.top);
 
-    noX += dx;
-    noY += dy;
+    noX += dx; noY += dy;
 
     const scale = tries >= 10 ? 0.88 : 1;
     noBtn.style.transform = `translate(${noX}px, ${noY}px) scale(${scale})`;
@@ -314,8 +311,7 @@
   function moveNoRandomButSafe() {
     const x = Math.floor(Math.random()*220) - 110;
     const y = Math.floor(Math.random()*44)  - 22;
-    noX = x;
-    noY = y;
+    noX = x; noY = y;
     noBtn.style.transform = `translate(${noX}px, ${noY}px)`;
     requestAnimationFrame(clampNoInside);
   }
@@ -325,7 +321,6 @@
     bar.style.width = percent + "%";
   }
 
-  /* (2) Wife Approval popup */
   function openPopup(){
     overlay.style.display = "flex";
     vibrate([80,40,80]);
@@ -338,23 +333,19 @@
     yesClicked();
   }
 
-  /* (3) Fake screenshot detector toast */
   function showToast(customText){
+    if(!screenshotMode) return;
     toast.innerHTML = customText || `📸 Screenshot detected 👀<br><b>Neel wins confirmed</b> 😏👑<br><span style="font-size:12px;opacity:.9;">Evidence secured. Wife caught in 4K 😂</span>`;
     toast.style.display = "block";
     vibrate([90,40,90]);
-    for(let i=0;i<18;i++) setTimeout(spawnHeart, i*22);
+    spawnHearts(14);
     clearTimeout(showToast._t);
-    showToast._t = setTimeout(()=> toast.style.display="none", 2600);
+    showToast._t = setTimeout(()=> toast.style.display="none", 5000);
   }
 
-  // Badge tap => "detected"
-  document.addEventListener("click", (e)=>{
-    if (e.target.closest(".badge")) showToast();
-  });
-
-  // App switch / background => set flag, show toast on return
+  // Only active AFTER YES:
   document.addEventListener("visibilitychange", ()=>{
+    if(!screenshotMode) return;
     if (document.visibilityState === "hidden") {
       localStorage.setItem("ss_detected","1");
     } else {
@@ -365,48 +356,48 @@
     }
   });
 
-  // Long press anywhere => "detected"
   let pressTimer;
   document.addEventListener("touchstart", ()=>{
+    if(!screenshotMode) return;
     pressTimer = setTimeout(()=> showToast(), 650);
   }, {passive:true});
   document.addEventListener("touchend", ()=> clearTimeout(pressTimer));
 
   function tryNo(){
     tries++;
-
-    // Vibrate on NO attempts
     vibrate([50]);
 
-    // YES grows bigger
     yesScale += 0.16;
     yesBtn.style.transform = `scale(${yesScale})`;
 
-    msg.innerText = `NO attempts: ${tries} — ${lines[tries % lines.length]}`;
-
-    // NO runs but stays visible
     moveNoRandomButSafe();
 
-    // Apology bar progression
+    // Text line stays under buttons (always)
+    msg.innerText = `NO attempts: ${tries} — ${lines[tries % lines.length]}`;
+
+    // Bar stages
     if (tries === 3) showApologyBar(25);
     if (tries === 4) showApologyBar(45);
+
+    // Apology flowers stage (YOUR CHANGE)
     if (tries === 5) {
       showApologyBar(70);
-      msg.innerText = `NO attempts: ${tries} — Uploading apology… ${chores[Math.floor(Math.random()*chores.length)]} 😂`;
-      vibrate([80,30,80]);
-    }
-    if (tries >= 6 && tries <= 8) {
-      showApologyBar(80 + (tries-6)*7);
-      msg.innerText = `NO attempts: ${tries} — ${chores[Math.floor(Math.random()*chores.length)]} (wife auto-approved) 👑😂`;
+      spawnFlowers(18);
+      msg.innerText = `NO attempts: ${tries} — ✅ Apology flowers 🌹`;
+      vibrate([90,30,90]);
     }
 
-    // Popup trigger (once)
+    if (tries >= 6 && tries <= 8) {
+      showApologyBar(80 + (tries-6)*7);
+      spawnFlowers(6);
+      msg.innerText = `NO attempts: ${tries} — ✅ Apology flowers 🌹 (wife auto-approved) 👑😂`;
+    }
+
     if (tries >= 7 && !popupShown) {
       popupShown = true;
       setTimeout(openPopup, 350);
     }
 
-    // Final stage
     if (tries >= 10) {
       noBtn.textContent = "Ok queen 👑";
       showApologyBar(100);
@@ -417,22 +408,37 @@
 
   function yesClicked(){
     vibrate([120,40,120]);
-    for(let i=0;i<45;i++) setTimeout(spawnHeart, i*18);
+    spawnHearts(40);
 
     setTimeout(() => {
       card.innerHTML = `
-        <div class="badge">📸 Screenshot & tap here<br><b>= Neel wins</b> 😏</div>
         <h1 style="margin:0 0 6px;">WIFE CONFIRMED ✅💖</h1>
         <p style="margin:0 0 6px;">Medam said YES 😍</p>
         <p style="margin:0 0 10px;"><b>Marriage rule update:</b> You are always right. Forever.</p>
         <p style="margin:0 0 14px;">Husband status: <b>Obsessed ✅</b> | Wallet: <b>in danger 🛒</b></p>
+
         <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"
              style="width:100%;border-radius:14px;">
+
+        <!-- Screenshot message appears ONLY at the end -->
+        <div class="finalBadge" id="finalBadge">
+          📸 Screenshot & tap here = <b>Neel wins</b> 😏
+        </div>
       `;
+
+      // Enable screenshot effects only now (after YES)
+      screenshotMode = true;
+
+      // Tap final badge shows toast (doesn't cover text)
+      document.getElementById("finalBadge").addEventListener("click", ()=>{
+        showToast();
+      });
+
+      // Show toast once automatically AFTER YES (at the end)
+      setTimeout(()=> showToast("📸 Screenshot detected? <br><b>Neel wins confirmed</b> 😏👑"), 800);
     }, 650);
   }
 
-  // Ensure NO stays in the area even on tiny screens
   window.addEventListener("load", () => {
     clampNoInside();
     window.addEventListener("resize", clampNoInside);
